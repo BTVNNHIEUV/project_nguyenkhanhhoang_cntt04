@@ -23,6 +23,9 @@ typedef struct{
 	char status[10]; //Trang thai cham cong
 }Timesheet;
 
+Timesheet tsList[MAX];
+int tsCount = 0;
+
 //DUPLICATE DETECTION
 int isDuplicateID(char tempID[]){
 for(int i = 0; i < n; i++) {
@@ -334,6 +337,106 @@ void Sortstuff(Employee a[], int n){
     hienThiDS(a, n);
 }
 
+void Checkin(Employee ds[], int n, Timesheet tsList[], int *tsCount){
+    char empId[20], date[20];
+
+    printf("\nInsert employee ID: ");
+    fgets(empId, sizeof(empId), stdin);
+    empId[strcspn(empId, "\n")] = 0;
+
+    if(strlen(empId) == 0){
+        printf("ERROR: nothing was inserted!\n");
+        return;
+    }
+
+    printf("Insert checkin date (YYYY-MM-DD): ");
+    fgets(date, sizeof(date), stdin);
+    date[strcspn(date, "\n")] = 0;
+
+    if(strlen(date) == 0){
+        printf("ERROR: please insert a valid date!\n");
+        return;
+    }
+
+    // EXIST?
+    int empIndex = -1;
+    for(int i = 0; i < n; i++){
+        if (strcmp(ds[i].empId, empId) == 0) {
+            empIndex = i;
+            break;
+        }
+    }
+    if(empIndex == -1){
+        printf("ERROR: Can't find the employee'!\n");
+        return;
+    }
+
+    // 2. CHECKIN YET?
+    for(int i = 0; i < *tsCount; i++) {
+        if(strcmp(tsList[i].empId, empId) == 0 &&
+            strcmp(tsList[i].date, date) == 0){
+            printf("ERROR: the employee have already checkin that day!\n");
+            return;
+        }
+    }
+
+    // 3. NEW INTEL
+    sprintf(tsList[*tsCount].logId, "TS%03d", *tsCount + 1);
+    strcpy(tsList[*tsCount].empId, empId);
+    strcpy(tsList[*tsCount].date, date);
+    strcpy(tsList[*tsCount].status, "good");
+
+    (*tsCount)++;
+
+    // 4. UP++
+    ds[empIndex].workDay++;
+
+    printf("Cham cong thanh cong!\n");
+}
+
+//SHOW TIME SHEET
+void ShowTimesheet(Employee ds[], int n, Timesheet tsList[], int tsCount){
+    char empId[20];
+    int foundEmp = 0;
+
+    printf("Insert employee ID to see: ");
+    fgets(empId, sizeof(empId), stdin);
+    empId[strcspn(empId, "\n")] = 0;
+
+    if(strlen(empId) == 0){
+        printf("ERROR: no ID was inserted!\n");
+        return;
+    }
+    // EXIST?
+    for (int i = 0; i < n; i++) {
+        if (strcmp(ds[i].empId, empId) == 0) {
+            foundEmp = 1;
+            break;
+        }
+    }
+    if(!foundEmp){
+        printf("ERROR: can't find the employee'!\n");
+        return;
+    }
+
+    // SHOW
+    int count = 0;
+    printf("\nWORK SHEET %s:\n", empId);
+    printf("%-10s %-12s %-8s\n", "LogID", "Date", "Status");
+    printf("-----------------------------\n");
+
+    for (int i = 0; i < tsCount; i++) {
+        if (strcmp(tsList[i].empId, empId) == 0) {
+            printf("%-10s %-12s %-8s\n", tsList[i].logId, tsList[i].date, tsList[i].status);
+            count++;
+        }
+    }
+
+    if (count == 0){
+        printf("Employee didn't checkin yet'!\n");
+    }
+}
+
 //EXIST EMPLOYEE
 void Employd(){
     strcpy(ds[0].empId, "NV001");
@@ -457,8 +560,10 @@ do{
         	Sortstuff(ds, n);
             break;
         case 7:
+			Checkin(ds, n, tsList, &tsCount);
             break;
         case 8:
+			ShowTimesheet(ds, n, tsList, tsCount);
             break;
         case 9:
             printf("Exiting...\n");
@@ -471,4 +576,5 @@ do{
 return 0;
 
 }
+
 

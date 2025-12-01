@@ -3,64 +3,60 @@
 #include <string.h>
 #include <ctype.h>
 
-#define MAX 100
+#define MAX_EMPLOYEES 100
 
-typedef struct{
-	char empId[20]; //Ma nhan vien.
-	char name[50]; //Ten nhan vien.
-	char position[15]; //Chuc vu nhan vien.
-	double baseSalary; //Luong co bao nhieu.
-	int workDay; //Ngay cong(Mac dinh khi tao = 0)
-}Employee;
+typedef struct {
+char employeeId[20];
+char fullName[50];
+char position[15];
+double baseSalary;
+int workDays;
+} Employee;
 
-Employee ds[MAX];
-int n = 0;
+Employee employeeList[MAX_EMPLOYEES];
+int employeeCount = 0;
 
-typedef struct{
-	char logId[20]; //Ma giao dich
-	char empId[20]; //Ma tai khoan nhan vien
-	char date[20]; //Ngay cham cong
-	char status[10]; //Trang thai cham cong
-}Timesheet;
+typedef struct {
+int logId;
+char employeeId[20];
+char date[20];
+char status[10];
+} Timesheet;
 
-Timesheet tsList[MAX];
-int tsCount = 0;
+Timesheet timesheetList[MAX_EMPLOYEES];
+int timesheetCount = 0;
 
-//DUPLICATE DETECTION
-int isDuplicateID(char tempID[]){
-for(int i = 0; i < n; i++) {
-if(strcmp(ds[i].empId, tempID) == 0)
-return 1;
+// Duplicate detection
+int isDuplicateId(char id[]) {
+for (int i = 0; i < employeeCount; i++) {
+if (strcmp(employeeList[i].employeeId, id) == 0) return 1;
 }
 return 0;
 }
 
-//NUMBER DETECTION FOR MENU AND WORKDAY
-int Number(char suggest[], int min, int max){
-char string[20];
-do{
-printf("%s (from %d to %d): \n", suggest, min, max);
-fgets(string, sizeof(string), stdin);
-string[strcspn(string, "\n")] = 0;
+// Number input for menu and workdays
+int inputNumberInRange(char prompt[], int min, int max) {
+char input[20];
+do {
+printf("%s (from %d to %d): \n", prompt, min, max);
+fgets(input, sizeof(input), stdin);
+input[strcspn(input, "\n")] = 0;
 
-    if(string[0] == '\0'){  
-        printf("ERROR:nothing was inserted.\n");
-    }else{
+    if (input[0] == '\0') {
+        printf("ERROR: Nothing was inserted.\n");
+    } else {
         int isDigit = 1;
-        for (int i = 0; i < strlen(string); i++){
-            if (!isdigit(string[i])){  
+        for (int i = 0; i < strlen(input); i++) {
+            if (!isdigit(input[i])) {
                 isDigit = 0;
                 break;
             }
         }
-        if (isDigit){
-            int number = atoi(string);
-            if (number >= min && number <= max){  
-                return number;
-            }else{
-                printf("Insert number from %d to %d.\n", min, max);
-            }
-        }else{
+        if (isDigit) {
+            int number = atoi(input);
+            if (number >= min && number <= max) return number;
+            else printf("Insert number from %d to %d.\n", min, max);
+        } else {
             printf("Please insert a positive number.\n");
         }
     }
@@ -68,513 +64,481 @@ string[strcspn(string, "\n")] = 0;
 
 }
 
-//NUMBER DECTECTION FOR SALARY
-double Number2(char suggest[]){
-char string[50];
+// Number input for salary
+double inputPositiveDouble(char prompt[]) {
+char input[50];
 do {
-printf("%s: ", suggest);
-fgets(string, sizeof(string), stdin);
-string[strcspn(string, "\n")] = 0;
-int dot = 0;
-int valid = 1;
-if(string[0]=='\0') valid=0;
-for(int i=0; string[i]; i++){
-if(string[i]=='.'){
-dot++;
-if(dot>1) valid=0;
-} else if(!isdigit(string[i])) valid=0;
-}
-if(valid){
-double value = atof(string);
-if(value>0) return value;
-}
-printf("Please input a positive numbers!\n");
-} while(1);
+printf("%s: ", prompt);
+fgets(input, sizeof(input), stdin);
+input[strcspn(input, "\n")] = 0;
+
+    int dotCount = 0;
+    int valid = 1;
+
+    if (input[0] == '\0') valid = 0;
+    for (int i = 0; input[i]; i++) {
+        if (input[i] == '.') {
+            dotCount++;
+            if (dotCount > 1) valid = 0;
+        } else if (!isdigit(input[i])) valid = 0;
+    }
+
+    if (valid) {
+        double value = atof(input);
+        if (value > 0) return value;
+    }
+    printf("Please input a positive number!\n");
+} while (1);
+
 }
 
-//ENTER NEW EMPLOYEE
-void Newemp(Employee *em){
+// Add new employee
+void addNewEmployee(Employee *emp) {
 char temp[50];
 
-do{
+do {
     printf("\nInsert employee ID: ");
     fflush(stdin);
     fgets(temp, 50, stdin);
     temp[strcspn(temp, "\n")] = '\0';
 
-    if(strlen(temp) == 0){
+    if (strlen(temp) == 0) {
         printf("ERROR: ID cannot be empty!\n");
         continue;
     }
-    if(isDuplicateID(temp)){
+    if (isDuplicateId(temp)) {
         printf("ERROR: ID already exists!\n");
         continue;
     }
-    strcpy(em->empId, temp);
+    strcpy(emp->employeeId, temp);
     break;
-}while(1);
+} while (1);
 
-do{
-    printf("Insert name: ");
+do {
+    printf("Insert full name: ");
     fflush(stdin);
     fgets(temp, 50, stdin);
     temp[strcspn(temp, "\n")] = '\0';
-
-    if(strlen(temp) == 0){
+    if (strlen(temp) == 0) {
         printf("ERROR: Name cannot be empty!\n");
         continue;
     }
-    strcpy(em->name, temp);
+    strcpy(emp->fullName, temp);
     break;
-}while(1);
+} while (1);
 
-do{
+do {
     printf("Insert position: ");
     fflush(stdin);
     fgets(temp, 50, stdin);
     temp[strcspn(temp, "\n")] = '\0';
-
-    if(strlen(temp) == 0){
+    if (strlen(temp) == 0) {
         printf("ERROR: Position cannot be empty!\n");
         continue;
     }
-    strcpy(em->position, temp);
+    strcpy(emp->position, temp);
     break;
-}while(1);
-em->baseSalary = Number2("Insert salary: ");
-em->workDay = Number("Insert workday: ",0,100);
-printf("New employee have been added!\n\n");  
+} while (1);
+
+emp->baseSalary = inputPositiveDouble("Insert salary");
+
+printf("New employee has been added!\n\n");
+
 }
-//LIST DATA
-void Show1emp(Employee em){
-printf("||%-10s %-20s %-15s %-12.2lf %d     ||\n",
-em.empId, em.name, em.position, em.baseSalary, em.workDay);
+
+// Show one employee
+void showEmployee(Employee emp) {
+printf("||%-10s %-20s %-15s %-12.2lf %d      ||\n",
+emp.employeeId, emp.fullName, emp.position, emp.baseSalary, emp.workDays);
 printf("||--------------------------------------------------------------------||\n");
 }
 
-//SHOW LIST
-void hienThiDS(Employee a[], int n){
-if(n == 0){
-	printf("The list is empty!\n");
-	return;
+// Show all employees (paginated)
+void showEmployeeList(Employee list[], int count) {
+if (count == 0) {
+printf("The list is empty!\n");
+return;
 }
-int pagesize = 5;
-int totalpage = (n + pagesize - 1) / pagesize;
-int currentpage = 1;
+int pageSize = 5;
+int totalPage = (count + pageSize - 1) / pageSize;
+int currentPage = 1;
 char choice;
 
-do{
-	system("cls");
-	
-	int start = (currentpage - 1)*pagesize;
-	int end = start + pagesize;
-	if(end > n) end = n;
-	
-	printf("||====================================================================||\n");
-	printf("||the list have %d page, you are currently on page %d.                  ||\n",
-			totalpage, currentpage);
-	printf("||====================================================================||\n");
-    printf("||%-10s %-20s %-15s %-12s %s||\n",
-	"ID", "Name", "Position", "Salary", "Workday");
-	printf("||--------------------------------------------------------------------||\n");
-	for(int i = start; i < end; i++){
-		Show1emp(a[i]);
-	}
-		printf("\n|P|rev - |N|ext - |E|xit: ");
-		fflush(stdin);
-		scanf("%c", &choice);
-	
-		if(choice == 'N' || choice == 'n'){
-			if(currentpage < totalpage)
-		   currentpage++;
-		else
-			printf("ERROR:you have reach the end of the list!\n");
-		}else if (choice == 'P' || choice == 'p'){
-		if(currentpage > 1)
-		   currentpage--;
-		else
-			printf("ERROR:you are on the first page!\n");
-		}else if (choice == 'E' || choice == 'e'){
-			break;
-		}
-	}while (1);
+do {
+    system("cls");
+    int start = (currentPage - 1) * pageSize;
+    int end = start + pageSize;
+    if (end > count) end = count;
+
+    printf("||====================================================================||\n");
+    printf("||Total %d pages, currently on page %d.                                ||\n", totalPage, currentPage);
+    printf("||====================================================================||\n");
+    printf("||%-10s %-20s %-15s %-12s %s||\n", "ID", "Name", "Position", "Salary", "Workdays");
+    printf("||--------------------------------------------------------------------||\n");
+
+    for (int i = start; i < end; i++) {
+        showEmployee(list[i]);
+    }
+
+    printf("\n|P|rev - |N|ext - |E|xit: ");
+    fflush(stdin);
+    scanf("%c", &choice);
+
+    if (choice == 'N' || choice == 'n') {
+        if (currentPage < totalPage) currentPage++;
+        else printf("ERROR: you have reached the end of the list!\n");
+    } else if (choice == 'P' || choice == 'p') {
+        if (currentPage > 1) currentPage--;
+        else printf("ERROR: you are on the first page!\n");
+    } else if (choice == 'E' || choice == 'e') {
+        break;
+    }
+} while (1);
+
 }
-int SearchID(Employee a[], int n, char ID[]){
-for(int i = 0; i < n; i++){
-if(strcmp(a[i].empId, ID) == 0)
-return i;
+
+// Search by employee ID
+int findEmployeeById(Employee list[], int count, char id[]) {
+for (int i = 0; i < count; i++) {
+if (strcmp(list[i].employeeId, id) == 0) return i;
 }
 return -1;
 }
 
-//FIRE EMPLOYEE
-void Fire(Employee a[], int *n){
-char ID[20];
+// Fire employee
+void fireEmployee(Employee list[], int *count) {
+char id[20];
 printf("Insert ID to fire: ");
 fflush(stdin);
-fgets(ID, 20, stdin);
-ID[strcspn(ID, "\n")] = '\0';
+fgets(id, 20, stdin);
+id[strcspn(id, "\n")] = '\0';
 
-int pos = SearchID(a, *n, ID);
-if(pos == -1){
+int pos = findEmployeeById(list, *count, id);
+if (pos == -1) {
     printf("ERROR: ID not found!\n");
     return;
 }
-for(int i = pos; i < *n - 1; i++)
-    a[i] = a[i+1];
 
-(*n)--;
+for (int i = pos; i < *count - 1; i++) list[i] = list[i + 1];
+
+(*count)--;
 printf("Fire complete!\n\n");
 
 }
 
-//UPDATEFILE
-void updateprofile(Employee a[], int n,Employee *em){
-char ID[20];
+// Update employee profile
+void updateEmployeeProfile(Employee list[], int count) {
+char id[20];
 char temp[50];
 
 printf("\nInsert employee ID to update: ");
 fflush(stdin);
-fgets(ID, 20, stdin);
-ID[strcspn(ID, "\n")] = '\0';
+fgets(id, 20, stdin);
+id[strcspn(id, "\n")] = '\0';
 
-int pos = SearchID(a, n, ID);
-if(pos == -1){
+int pos = findEmployeeById(list, count, id);
+if (pos == -1) {
     printf("ERROR: ID not found!\n");
     return;
 }
 
 printf("===== Updating employee profile =====\n");
 
-do{
-    printf("Insert new name: ");
+do {
+    printf("Insert new full name: ");
     fflush(stdin);
     fgets(temp, 50, stdin);
     temp[strcspn(temp, "\n")] = '\0';
-    if(strlen(temp) == 0){
+    if (strlen(temp) == 0) {
         printf("ERROR: Name cannot be empty!\n");
         continue;
     }
-    strcpy(a[pos].name, temp);
+    strcpy(list[pos].fullName, temp);
     break;
-}while(1);
+} while (1);
 
-do{
+do {
     printf("Insert new position: ");
     fflush(stdin);
     fgets(temp, 50, stdin);
     temp[strcspn(temp, "\n")] = '\0';
-    if(strlen(temp) == 0){
+    if (strlen(temp) == 0) {
         printf("ERROR: Position cannot be empty!\n");
         continue;
     }
-    strcpy(a[pos].position, temp);
+    strcpy(list[pos].position, temp);
     break;
-}while(1);
+} while (1);
 
-    a[pos].baseSalary = Number2("Insert salary");
-	printf("Update complete!\n\n");
+list[pos].baseSalary = inputPositiveDouble("Insert salary");
+printf("Update complete!\n\n");
+
 }
 
-//SEARCH NAME
-void Searchname(Employee a[], int n){
-	char Name[50];
-	do{
-	printf("Insert name to search: ");
-	fflush(stdin);
-	fgets(Name, 50, stdin);
-	Name[strcspn(Name, "\n")] = '\0';
-	
-	if(strlen(Name) == 0){
-            printf("ERROR:name cannot be empty!\n");
-        }else{
-            break;
-        }
-    } while(1);
-	int found = 0;
-	
-	for(int i = 0; i < n; i++){
-		if(strstr(a[i].name, Name) != NULL){
-			Show1emp(a[i]);
-			found = 1; 
-		}
-	}
-	if(!found) printf("ERROR:there no record of that name!\n");
+// Search by name using Linear Search
+void searchEmployeeByName(Employee list[], int count) {
+char name[50];
+do {
+printf("Insert name to search: ");
+fflush(stdin);
+fgets(name, 50, stdin);
+name[strcspn(name, "\n")] = '\0';
+
+    if (strlen(name) == 0) printf("ERROR: name cannot be empty!\n");
+    else break;
+} while (1);
+
+int found = 0;
+for (int i = 0; i < count; i++) {
+    if (strstr(list[i].fullName, name) != NULL) {
+        showEmployee(list[i]);
+        found = 1;
+    }
+}
+if (!found) printf("ERROR: no record of that name!\n");
+
 }
 
-//SORTING BY SALARY
-void Sortstuff(Employee a[], int n){
-    int choice;
+// Sort employees by salary using bubble sort
+void sortEmployeesBySalary(Employee list[], int count) {
+int choice;
 
-    printf("\n||====== SORT BY SALARY ======||\n");
-    printf("||       1. High -> Low       ||\n");
-    printf("||       2. Low -> High       ||\n");
-    printf("||============================||\n");
+printf("\n||====== SORT BY SALARY ======||\n");
+printf("||       1. High -> Low       ||\n");
+printf("||       2. Low -> High       ||\n");
+printf("||============================||\n");
 
-    choice = Number("Choose sorting type", 1, 2);
+choice = inputNumberInRange("Choose sorting type", 1, 2);
 
-    for(int i = 0; i < n - 1; i++){
-        for(int j = i + 1; j < n; j++){
-            if(choice == 1){  
-                //DOWN
-                if(a[i].baseSalary < a[j].baseSalary){
-                    Employee temp = a[i];
-                    a[i] = a[j];
-                    a[j] = temp;
-                }
-            }else{  
-                //UP
-                if(a[i].baseSalary > a[j].baseSalary){
-                    Employee temp = a[i];
-                    a[i] = a[j];
-                    a[j] = temp;
-                }
-            }
+for (int i = 0; i < count - 1; i++) {
+    for (int j = i + 1; j < count; j++) {
+    	//Sort by high to low
+        if (choice == 1 && list[i].baseSalary < list[j].baseSalary) {
+            Employee temp = list[i];
+            list[i] = list[j];
+            list[j] = temp;
+        //Sort by low to high
+        } else if (choice == 2 && list[i].baseSalary > list[j].baseSalary) {
+            Employee temp = list[i];
+            list[i] = list[j];
+            list[j] = temp;
         }
     }
-
-    printf("\nSorting complete!\n");
-    hienThiDS(a, n);
 }
 
-void Checkin(Employee ds[], int n, Timesheet tsList[], int *tsCount){
-    char empId[20], date[20];
+printf("\nSorting complete!\n");
+showEmployeeList(list, count);
 
+}
+
+// Employee check-in
+void checkIn(Employee list[], int count, Timesheet tsList[], int *tsCount) {
+char empId[20], date[20];
+int empIndex = -1;
+
+// Insert employee id and if it exist
+do {
     printf("\nInsert employee ID: ");
     fgets(empId, sizeof(empId), stdin);
     empId[strcspn(empId, "\n")] = 0;
 
-    if(strlen(empId) == 0){
-        printf("ERROR: nothing was inserted!\n");
-        return;
+    if (strlen(empId) == 0) {
+        printf("ERROR: nothing was inserted! Please try again.\n");
+        continue;
     }
 
-    printf("Insert checkin date (YYYY-MM-DD): ");
+    empIndex = findEmployeeById(list, count, empId);
+    if (empIndex == -1) {
+        printf("ERROR: Can't find the employee! Please try again.\n");
+    }
+} while (empIndex == -1);
+
+// Insert checkin date and if it valid
+int validDate = 0;
+do {
+    printf("Insert check-in date (YYYY-MM-DD): ");
     fgets(date, sizeof(date), stdin);
     date[strcspn(date, "\n")] = 0;
 
-    if(strlen(date) == 0){
+    if (strlen(date) == 0) {
         printf("ERROR: please insert a valid date!\n");
-        return;
+        continue;
     }
 
-    // EXIST?
-    int empIndex = -1;
-    for(int i = 0; i < n; i++){
-        if (strcmp(ds[i].empId, empId) == 0) {
-            empIndex = i;
+    // Check if the employee checkin yet
+    int duplicate = 0;
+    for (int i = 0; i < *tsCount; i++) {
+        if (strcmp(tsList[i].employeeId, empId) == 0 && strcmp(tsList[i].date, date) == 0) {
+            printf("ERROR: the employee has already checked in that day!\n");
+            duplicate = 1;
             break;
         }
     }
-    if(empIndex == -1){
-        printf("ERROR: Can't find the employee'!\n");
-        return;
-    }
+    if (!duplicate) validDate = 1;
 
-    // 2. CHECKIN YET?
-    for(int i = 0; i < *tsCount; i++) {
-        if(strcmp(tsList[i].empId, empId) == 0 &&
-            strcmp(tsList[i].date, date) == 0){
-            printf("ERROR: the employee have already checkin that day!\n");
-            return;
-        }
-    }
+} while (!validDate);
 
-    // 3. NEW INTEL
-    sprintf(tsList[*tsCount].logId, "TS%03d", *tsCount + 1);
-    strcpy(tsList[*tsCount].empId, empId);
-    strcpy(tsList[*tsCount].date, date);
-    strcpy(tsList[*tsCount].status, "good");
+// Add template
 
-    (*tsCount)++;
+tsList[*tsCount].logId = *tsCount + 1;
+strcpy(tsList[*tsCount].employeeId, empId);
+strcpy(tsList[*tsCount].date, date);
+strcpy(tsList[*tsCount].status, "good");
 
-    // 4. UP++
-    ds[empIndex].workDay++;
+(*tsCount)++;
+list[empIndex].workDays++;
 
-    printf("Cham cong thanh cong!\n");
+printf("Check-in successful!\n");
 }
 
-//SHOW TIME SHEET
-void ShowTimesheet(Employee ds[], int n, Timesheet tsList[], int tsCount){
-    char empId[20];
-    int foundEmp = 0;
+// Show timesheet
+void showEmployeeTimesheet(Employee list[], int count, Timesheet tsList[], int tsCount) {
+char empId[20];
+int foundEmp = 0;
 
-    printf("Insert employee ID to see: ");
-    fgets(empId, sizeof(empId), stdin);
-    empId[strcspn(empId, "\n")] = 0;
+printf("Insert employee ID to see: ");
+fgets(empId, sizeof(empId), stdin);
+empId[strcspn(empId, "\n")] = 0;
 
-    if(strlen(empId) == 0){
-        printf("ERROR: no ID was inserted!\n");
-        return;
-    }
-    // EXIST?
-    for (int i = 0; i < n; i++) {
-        if (strcmp(ds[i].empId, empId) == 0) {
-            foundEmp = 1;
-            break;
-        }
-    }
-    if(!foundEmp){
-        printf("ERROR: can't find the employee'!\n");
-        return;
-    }
+if (strlen(empId) == 0) {
+    printf("ERROR: no ID was inserted!\n");
+    return;
+}
 
-    // SHOW
-    int count = 0;
-    printf("\nWORK SHEET %s:\n", empId);
-    printf("%-10s %-12s %-8s\n", "LogID", "Date", "Status");
-    printf("-----------------------------\n");
+if (findEmployeeById(list, count, empId) == -1) {
+    printf("ERROR: can't find the employee!\n");
+    return;
+}
 
-    for (int i = 0; i < tsCount; i++) {
-        if (strcmp(tsList[i].empId, empId) == 0) {
-            printf("%-10s %-12s %-8s\n", tsList[i].logId, tsList[i].date, tsList[i].status);
-            count++;
-        }
-    }
+int foundCount = 0;
+printf("\nWORK SHEET %s:\n", empId);
+printf("%-10s %-12s %-8s\n", "LogID", "Date", "Status");
+printf("-----------------------------\n");
 
-    if (count == 0){
-        printf("Employee didn't checkin yet'!\n");
+for (int i = 0; i < tsCount; i++) {
+    if (strcmp(tsList[i].employeeId, empId) == 0) {
+        printf("%-10d %-12s %-8s\n", tsList[i].logId, tsList[i].date, tsList[i].status);
+        foundCount++;
     }
 }
 
-//EXIST EMPLOYEE
-void Employd(){
-    strcpy(ds[0].empId, "NV001");
-    strcpy(ds[0].name, "NguyenVanA");
-    strcpy(ds[0].position, "Manager");
-    ds[0].baseSalary = 15000000;
-    ds[0].workDay = 20;
+if (foundCount == 0) printf("Employee hasn't checked in yet!\n");
 
-    strcpy(ds[1].empId, "NV002");
-    strcpy(ds[1].name, "TranThiB");
-    strcpy(ds[1].position, "Staff");
-    ds[1].baseSalary = 8000000;
-    ds[1].workDay = 18;
+}
 
-    strcpy(ds[2].empId, "NV003");
-    strcpy(ds[2].name, "LeVanC");
-    strcpy(ds[2].position, "Staff");
-    ds[2].baseSalary = 9000000;
-    ds[2].workDay = 22;
+// Employed
+void addDefaultEmployees() {
+	strcpy(employeeList[0].employeeId, "NV001");
+strcpy(employeeList[0].fullName, "NguyenVanA");
+strcpy(employeeList[0].position, "Manager");
+employeeList[0].baseSalary = 15000000;
+employeeList[0].workDays = 0;
 
-    strcpy(ds[3].empId, "NV004");
-    strcpy(ds[3].name, "PhamVanD");
-    strcpy(ds[3].position, "HR");
-    ds[3].baseSalary = 7000000;
-    ds[3].workDay = 19;
+strcpy(employeeList[1].employeeId, "NV002");
+strcpy(employeeList[1].fullName, "TranThiB");
+strcpy(employeeList[1].position, "Staff");
+employeeList[1].baseSalary = 8000000;
+employeeList[1].workDays = 0;
 
-    strcpy(ds[4].empId, "NV005");
-    strcpy(ds[4].name, "VoThiE");
-    strcpy(ds[4].position, "Accountant");
-    ds[4].baseSalary = 11000000;
-    ds[4].workDay = 21;
+strcpy(employeeList[2].employeeId, "NV003");
+strcpy(employeeList[2].fullName, "LeVanC");
+strcpy(employeeList[2].position, "Staff");
+employeeList[2].baseSalary = 9000000;
+employeeList[2].workDays = 0;
 
-    strcpy(ds[5].empId, "NV006");
-    strcpy(ds[5].name, "HoangVanF");
-    strcpy(ds[5].position, "Sales");
-    ds[5].baseSalary = 10000000;
-    ds[5].workDay = 23;
+strcpy(employeeList[3].employeeId, "NV004");
+strcpy(employeeList[3].fullName, "PhamVanD");
+strcpy(employeeList[3].position, "HR");
+employeeList[3].baseSalary = 7000000;
+employeeList[3].workDays = 0;
 
-    strcpy(ds[6].empId, "NV007");
-    strcpy(ds[6].name, "DoThiG");
-    strcpy(ds[6].position, "Marketing");
-    ds[6].baseSalary = 9500000;
-    ds[6].workDay = 20;
+strcpy(employeeList[4].employeeId, "NV005");
+strcpy(employeeList[4].fullName, "VoThiE");
+strcpy(employeeList[4].position, "Accountant");
+employeeList[4].baseSalary = 11000000;
+employeeList[4].workDays = 0;
 
-    strcpy(ds[7].empId, "NV008");
-    strcpy(ds[7].name, "BuiVanH");
-    strcpy(ds[7].position, "Security");
-    ds[7].baseSalary = 6000000;
-    ds[7].workDay = 26;
+strcpy(employeeList[5].employeeId, "NV006");
+strcpy(employeeList[5].fullName, "HoangVanF");
+strcpy(employeeList[5].position, "Sales");
+employeeList[5].baseSalary = 10000000;
+employeeList[5].workDays = 0;
 
-    strcpy(ds[8].empId, "NV009");
-    strcpy(ds[8].name, "DangThiI");
-    strcpy(ds[8].position, "Cleaner");
-    ds[8].baseSalary = 5000000;
-    ds[8].workDay = 28;
+strcpy(employeeList[6].employeeId, "NV007");
+strcpy(employeeList[6].fullName, "DoThiG");
+strcpy(employeeList[6].position, "Marketing");
+employeeList[6].baseSalary = 9500000;
+employeeList[6].workDays = 0;
 
-    strcpy(ds[9].empId, "NV010");
-    strcpy(ds[9].name, "TrinhVanK");
-    strcpy(ds[9].position, "IT");
-    ds[9].baseSalary = 14000000;
-    ds[9].workDay = 22;
+strcpy(employeeList[7].employeeId, "NV008");
+strcpy(employeeList[7].fullName, "BuiVanH");
+strcpy(employeeList[7].position, "Security");
+employeeList[7].baseSalary = 6000000;
+employeeList[7].workDays = 0;
 
-    strcpy(ds[10].empId, "NV011");
-    strcpy(ds[10].name, "LeThiL");
-    strcpy(ds[10].position, "Receptionist");
-    ds[10].baseSalary = 6500000;
-    ds[10].workDay = 24;
+strcpy(employeeList[8].employeeId, "NV009");
+strcpy(employeeList[8].fullName, "DangThiI");
+strcpy(employeeList[8].position, "Cleaner");
+employeeList[8].baseSalary = 5000000;
+employeeList[8].workDays = 0;
 
-    strcpy(ds[11].empId, "NV012");
-    strcpy(ds[11].name, "PhanVanM");
-    strcpy(ds[11].position, "Driver");
-    ds[11].baseSalary = 7000000;
-    ds[11].workDay = 25;
+strcpy(employeeList[9].employeeId, "NV010");
+strcpy(employeeList[9].fullName, "TrinhVanK");
+strcpy(employeeList[9].position, "IT");
+employeeList[9].baseSalary = 14000000;
+employeeList[9].workDays = 0;
 
-    n = 12;
+strcpy(employeeList[10].employeeId, "NV011");
+strcpy(employeeList[10].fullName, "LeThiL");
+strcpy(employeeList[10].position, "Receptionist");
+employeeList[10].baseSalary = 6500000;
+employeeList[10].workDays = 0;
+
+strcpy(employeeList[11].employeeId, "NV012");
+strcpy(employeeList[11].fullName, "PhanVanM");
+strcpy(employeeList[11].position, "Driver");
+employeeList[11].baseSalary = 7000000;
+employeeList[11].workDays = 0;
+
+
+employeeCount = 12;
+
 }
 
 int main(){
 int choice;
 
-Employd();
+addDefaultEmployees();
 
-do{
+do {
     printf("\nXX=========== MENU ===========XX\n");
     printf("||1. Add new employee         ||\n");
     printf("||2. Update profile           ||\n");
-    printf("||3. Fire employee	      ||\n");
+    printf("||3. Fire employee            ||\n");
     printf("||4. Show employees           ||\n");
-    printf("||5. Search Name	      ||\n");
-    printf("||6. Sorting by salary	      ||\n");
-    printf("||7. Checkin date	      ||\n");
-    printf("||8. View employee status     ||\n");
-    printf("||9. Exit program	      ||\n");
+    printf("||5. Search by name           ||\n");
+    printf("||6. Sort by salary           ||\n");
+    printf("||7. Check-in date            ||\n");
+    printf("||8. View employee timesheet  ||\n");
+    printf("||9. Exit program             ||\n");
     printf("XX============================XX\n");
-   
-   choice = Number("choose",1,9); 
-    
 
-    switch(choice){
-        case 1:
-            if(n < MAX){
-                Newemp(&ds[n]);
-                n++;
-            } else {
-                printf("The list is full!\n");
-            }
-            break;
-        case 2:
-            updateprofile(ds, n,&ds[n]);
-            break;
-        case 3:
-            Fire(ds, &n);
-            break;
-        case 4:
-            hienThiDS(ds, n);
-            break;
-        case 5:
-        	Searchname(ds, n);
-            break;
-        case 6:
-        	Sortstuff(ds, n);
-            break;
-        case 7:
-			Checkin(ds, n, tsList, &tsCount);
-            break;
-        case 8:
-			ShowTimesheet(ds, n, tsList, tsCount);
-            break;
-        case 9:
-            printf("Exiting...\n");
-            break;
-        default:
-            printf("ERROR: Invalid choice!\n");
+    choice = inputNumberInRange("Choose", 1, 9);
+
+    switch (choice) {
+        case 1: addNewEmployee(&employeeList[employeeCount]); employeeCount++; break;
+        case 2: updateEmployeeProfile(employeeList, employeeCount); break;
+        case 3: fireEmployee(employeeList, &employeeCount); break;
+        case 4: showEmployeeList(employeeList, employeeCount); break;
+        case 5: searchEmployeeByName(employeeList, employeeCount); break;
+        case 6: sortEmployeesBySalary(employeeList, employeeCount); break;
+        case 7: checkIn(employeeList, employeeCount, timesheetList, &timesheetCount); break;
+        case 8: showEmployeeTimesheet(employeeList, employeeCount, timesheetList, timesheetCount); break;
+        case 9: printf("Exiting...\n"); break;
+        default: printf("ERROR: Invalid choice!\n"); break;
     }
-} while(choice != 9);
+} while (choice != 9);
 
 return 0;
 
 }
-
-

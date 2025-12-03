@@ -28,7 +28,7 @@ int timesheetCount = 0;
 
 // Duplicate detection
 int isDuplicateId(char id[]) {
-for (int i = 0; i < employeeCount; i++) {
+for (int i = 0; i < employeeCount; i++) {//duyet nv hien co
 if (strcmp(employeeList[i].employeeId, id) == 0) return 1;
 }
 return 0;
@@ -46,14 +46,14 @@ input[strcspn(input, "\n")] = 0;
         printf("ERROR: Nothing was inserted.\n");
     } else {
         int isDigit = 1;
-        for (int i = 0; i < strlen(input); i++) {
+        for (int i = 0; input[i]; i++) {
             if (!isdigit(input[i])) {
                 isDigit = 0;
                 break;
             }
         }
         if (isDigit) {
-            int number = atoi(input);
+            int number = atoi(input);//doi so nguyen
             if (number >= min && number <= max) return number;
             else printf("Insert number from %d to %d.\n", min, max);
         } else {
@@ -84,7 +84,7 @@ input[strcspn(input, "\n")] = 0;
     }
 
     if (valid) {
-        double value = atof(input);
+        double value = atof(input);//doi thanh so thuc
         if (value > 0) return value;
     }
     printf("Please input a positive number!\n");
@@ -102,7 +102,7 @@ do {
     fgets(temp, 50, stdin);
     temp[strcspn(temp, "\n")] = '\0';
 
-    if (strlen(temp) == 0) {
+    if(temp[0] == '\0') {
         printf("ERROR: ID cannot be empty!\n");
         continue;
     }
@@ -110,7 +110,7 @@ do {
         printf("ERROR: ID already exists!\n");
         continue;
     }
-    strcpy(emp->employeeId, temp);
+    strcpy(emp->employeeId, temp);//ghi du lieu
     break;
 } while (1);
 
@@ -119,7 +119,7 @@ do {
     fflush(stdin);
     fgets(temp, 50, stdin);
     temp[strcspn(temp, "\n")] = '\0';
-    if (strlen(temp) == 0) {
+    if(temp[0] == '\0') {
         printf("ERROR: Name cannot be empty!\n");
         continue;
     }
@@ -132,7 +132,7 @@ do {
     fflush(stdin);
     fgets(temp, 50, stdin);
     temp[strcspn(temp, "\n")] = '\0';
-    if (strlen(temp) == 0) {
+    if(temp[0] == '\0') {
         printf("ERROR: Position cannot be empty!\n");
         continue;
     }
@@ -166,9 +166,9 @@ char choice;
 
 do {
     system("cls");
-    int start = (currentPage - 1) * pageSize;
-    int end = start + pageSize;
-    if (end > count) end = count;
+    int start = (currentPage - 1) * pageSize;//chi so dau
+    int end = start + pageSize;// chi so cuoi
+    if (end > count) end = count;//ko cho vuot so luong
 
     printf("||====================================================================||\n");
     printf("||Total %d pages, currently on page %d.                                ||\n", totalPage, currentPage);
@@ -202,7 +202,7 @@ int findEmployeeById(Employee list[], int count, char id[]) {
 for (int i = 0; i < count; i++) {
 if (strcmp(list[i].employeeId, id) == 0) return i;
 }
-return -1;
+return -1;//no
 }
 
 // Fire employee
@@ -220,7 +220,7 @@ if (pos == -1) {
 }
 
 for (int i = pos; i < *count - 1; i++) list[i] = list[i + 1];
-
+//day vi tri sau len
 (*count)--;
 printf("Fire complete!\n\n");
 
@@ -249,7 +249,7 @@ do {
     fflush(stdin);
     fgets(temp, 50, stdin);
     temp[strcspn(temp, "\n")] = '\0';
-    if (strlen(temp) == 0) {
+    if(temp[0] == '\0') {
         printf("ERROR: Name cannot be empty!\n");
         continue;
     }
@@ -262,7 +262,7 @@ do {
     fflush(stdin);
     fgets(temp, 50, stdin);
     temp[strcspn(temp, "\n")] = '\0';
-    if (strlen(temp) == 0) {
+    if(temp[0] == '\0') {
         printf("ERROR: Position cannot be empty!\n");
         continue;
     }
@@ -284,13 +284,14 @@ fflush(stdin);
 fgets(name, 50, stdin);
 name[strcspn(name, "\n")] = '\0';
 
-    if (strlen(name) == 0) printf("ERROR: name cannot be empty!\n");
+    if(name[0] == '\0') 
+	printf("ERROR: name cannot be empty!\n");
     else break;
 } while (1);
 
 int found = 0;
 for (int i = 0; i < count; i++) {
-    if (strstr(list[i].fullName, name) != NULL) {
+    if (strstr(list[i].fullName, name) != NULL) {//tim chu dau tien
         showEmployee(list[i]);
         found = 1;
     }
@@ -342,7 +343,7 @@ do {
     fgets(empId, sizeof(empId), stdin);
     empId[strcspn(empId, "\n")] = 0;
 
-    if (strlen(empId) == 0) {
+    if(empId[0] == '\0') {
         printf("ERROR: nothing was inserted! Please try again.\n");
         continue;
     }
@@ -360,7 +361,7 @@ do {
     fgets(date, sizeof(date), stdin);
     date[strcspn(date, "\n")] = 0;
 
-    if (strlen(date) == 0) {
+    if(date[0] == '\0') {
         printf("ERROR: please insert a valid date!\n");
         continue;
     }
@@ -400,7 +401,7 @@ printf("Insert employee ID to see: ");
 fgets(empId, sizeof(empId), stdin);
 empId[strcspn(empId, "\n")] = 0;
 
-if (strlen(empId) == 0) {
+if(empId[0] == '\0') {
     printf("ERROR: no ID was inserted!\n");
     return;
 }
@@ -422,13 +423,15 @@ for (int i = 0; i < tsCount; i++) {
     }
 }
 
-if (foundCount == 0) printf("Employee hasn't checked in yet!\n");
+if (foundCount == 0) 
+printf("Employee hasn't checked in yet!\n");
 
 }
 
 // Employed
 void addDefaultEmployees() {
-	strcpy(employeeList[0].employeeId, "NV001");
+
+strcpy(employeeList[0].employeeId, "NV001");
 strcpy(employeeList[0].fullName, "NguyenVanA");
 strcpy(employeeList[0].position, "Manager");
 employeeList[0].baseSalary = 15000000;
